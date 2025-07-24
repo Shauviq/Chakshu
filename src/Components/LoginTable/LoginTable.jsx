@@ -1,22 +1,70 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { toast } from "react-toastify";
+import axios from "axios";
 
 const LoginTable = () => {
   const [mode, setMode] = useState(null); // 'login' or 'register'
+  const [formData, setFormData] = useState({});
   const navigate = useNavigate();
 
   const questions = {
     login: [
-      { label: "Email", placeholder: "Enter your email" },
-      { label: "Password", placeholder: "Enter your password" },
+      { name: "email", label: "Email", placeholder: "Enter your email" },
+      { name: "password", label: "Password", placeholder: "Enter your password" },
     ],
     register: [
-      { label: "Name", placeholder: "Enter your name" },
-      { label: "Email", placeholder: "Enter your email" },
-      { label: "Password", placeholder: "Create a password" },
-      { label: "Confirm Password", placeholder: "Repeat your password" },
+      { name: "name", label: "Name", placeholder: "Enter your name" },
+      { name: "email", label: "Email", placeholder: "Enter your email" },
+      { name: "password", label: "Password", placeholder: "Create a password" },
+      { name: "confirmPassword", label: "Confirm Password", placeholder: "Repeat your password" },
     ],
+  };
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (mode === "login") {
+      try {
+        const res = await axios.post("http://localhost:8080/auth/login", {
+          email: formData.email,
+          password: formData.password,
+        });
+
+        localStorage.setItem("token", res.data.jwtToken);
+        localStorage.setItem("loggedInUser", JSON.stringify({ name: res.data.name }));
+        toast.success("Login successful!");
+        navigate("/dashboard");
+      } catch (err) {
+        toast.error(err.response?.data?.message || "Login failed.");
+      }
+    }
+
+    if (mode === "register") {
+      if (formData.password !== formData.confirmPassword) {
+        toast.error("Passwords do not match.");
+        return;
+      }
+
+      try {
+        const res = await axios.post("http://localhost:8080/auth/signup", {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        });
+        toast.success("Registration successful!");
+        navigate("/home");
+      } catch (err) {
+        toast.error(err.response?.data?.message || "Registration failed.");
+      }
+    }
   };
 
   return (
@@ -40,14 +88,19 @@ const LoginTable = () => {
             </button>
           </div>
         ) : (
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <h3 className="text-2xl font-semibold text-center mb-4 capitalize">{mode} Details</h3>
+
             {questions[mode].map((q, idx) => (
               <div key={idx}>
                 <label className="block mb-1 text-[#C0C0C0]">{q.label}</label>
                 <input
-                  type={q.label.toLowerCase().includes("password") ? "password" : "text"}
+                  type={q.name.toLowerCase().includes("password") ? "password" : "text"}
+                  name={q.name}
+                  value={formData[q.name] || ""}
+                  onChange={handleChange}
                   placeholder={q.placeholder}
+                  required
                   className="w-full px-4 py-2 rounded-lg bg-[#1F2733] text-white border border-[#252F3D] focus:outline-none focus:border-[#36D399] transition-all"
                 />
               </div>
@@ -55,9 +108,6 @@ const LoginTable = () => {
 
             <button
               type="submit"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate('/dashboard')}}
               className="w-full bg-gradient-to-r from-[#36D399] to-[#00AAFF] text-[#101921] px-6 py-3 rounded-xl font-semibold hover:shadow-[0_0_12px_#36D399] transition-all duration-300"
             >
               Submit
