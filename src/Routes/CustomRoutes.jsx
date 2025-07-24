@@ -3,6 +3,7 @@ import Home from "../Pages/Home";
 import Dashboard from "../Pages/Dashboard";
 import Login from "../Pages/Login";
 import Faceid from "../Pages/Faceid";
+import Database from "../Pages/Database";
 
 
 function CustomRoutes() {
@@ -13,6 +14,7 @@ function CustomRoutes() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/login" element={<Login />} />
             <Route path="/faceid" element={<Faceid />} />
+            <Route path="/viewdata" element={<Database />} />
         </Routes>
     );
 };

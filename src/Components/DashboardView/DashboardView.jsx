@@ -25,6 +25,9 @@ const DashboardView = () => {
                   </div>
                 </div>
                 <div className="flex space-x-2">
+                  <Link to='/viewdata' className="px-3 py-1 text-white rounded text-xs font-bold flex justify-center">
+                     View Personnel Data
+                  </Link>
                   <Link to='/faceid' className="px-3 py-1 text-white rounded text-xs font-bold flex justify-center">
                      Add Face ID
                   </Link>
